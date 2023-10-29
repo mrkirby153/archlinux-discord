@@ -1,0 +1,52 @@
+# Maintainer: Filipe Laíns (FFY00) <lains@archlinux.org>
+# Maintainer: Morgan <morganamilo@archlinux.org>
+# Maintainer: T.J. Townsend <blakkheim@archlinux.org>
+
+pkgname=discord
+_pkgname=Discord
+pkgver=0.0.32
+pkgrel=1
+pkgdesc="All-in-one voice and text chat for gamers"
+arch=('x86_64')
+url='https://discord.com'
+license=('custom')
+options=(!strip)
+depends=('libnotify' 'libxss' 'nspr' 'nss' 'gtk3')
+optdepends=('libpulse: Pulseaudio support'
+            'libappindicator-gtk3: Systray indicator support'
+            'xdg-utils: Open files')
+source=("https://dl.discordapp.net/apps/linux/$pkgver/$pkgname-$pkgver.tar.gz"
+        "LICENSE-$pkgver.html::https://discordapp.com/terms"
+        "OSS-LICENSES-$pkgver.html::https://discordapp.com/licenses")
+sha512sums=('e3ca9075e4a66c7c4358bdccb748f8f849de24cf3036b85d2c42dd15f8e56125fc42e86e73920751126b0e4fa73596a1d7af1f21ac9903911d6c843637c46813'
+            '7c57ab103f749ea547dc4464a748642fdb0f6a223cc48d3002f28204862d4a784dd8280be19ebe0c8eceabf8060f1fbfd3b9bbe2a6b7e9ed4d1024e994608e1d'
+            '1b8045d35e7fab206f50bfad14ded62d13d3c58680b498b98251d103be9d91434ea717f29cb36f85e333e9f99efe1a1f72f8d31b04476c1f2f3662eccbed49ff')
+
+prepare() {
+  cd $_pkgname
+  sed -i "s|Exec=.*|Exec=/usr/bin/$pkgname|" $pkgname.desktop
+}
+
+package() {
+  install -d "$pkgdir"/opt/$pkgname
+  cp -a $_pkgname/. "$pkgdir"/opt/$pkgname
+
+  chmod 755 "$pkgdir"/opt/$pkgname/$_pkgname
+
+  rm "$pkgdir"/opt/$pkgname/postinst.sh
+
+  install -d "$pkgdir"/usr/bin
+  ln -s /opt/$pkgname/$_pkgname "$pkgdir"/usr/bin/$pkgname
+
+  install -d "$pkgdir"/usr/share/applications
+  ln -s /opt/$pkgname/$pkgname.desktop "$pkgdir"/usr/share/applications/$pkgname.desktop
+
+  install -d "$pkgdir"/usr/share/icons/hicolor/256x256/apps
+  ln -s /opt/$pkgname/discord.png "$pkgdir"/usr/share/icons/hicolor/256x256/apps/$pkgname.png
+
+  # setuid on chrome-sandbox
+  chmod u+s "$pkgdir"/opt/$pkgname/chrome-sandbox
+
+  install -Dm644 LICENSE-$pkgver.html "$pkgdir"/usr/share/licenses/$pkgname/LICENSE.html
+  install -Dm644 OSS-LICENSES-$pkgver.html "$pkgdir"/usr/share/licenses/$pkgname/OSS-LICENSES.html
+}

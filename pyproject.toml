@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "archlinux-discord"
+version = "0.1.1"
+description = ""
+authors = ["mrkirby153 <mr.austinwhyte@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "^2.31.0"
+
+[tool.poetry.scripts]
+archlinux-discord = "archlinux_discord.main:main"
+
+
+[tool.poetry.group.dev.dependencies]
+isort = "^5.12.0"
+black = "^23.10.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
