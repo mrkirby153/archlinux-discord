@@ -8,6 +8,11 @@ from archlinux_discord.config import get_config
 def build_package(branch: str, version: str):
     logging.info(f"Building branch {branch} with version {version}")
     path = os.path.join(get_config().get("workdir"), branch)
+
+    if os.path.exists(path):
+        logging.info(f"Removing existing working directory {path}")
+        shutil.rmtree(path)
+
     os.makedirs(path, exist_ok=True)
 
     logging.debug(f"Copying PKGBUILD to working directory...")

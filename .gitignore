@@ -1,6 +1,7 @@
 dist/
 .workdir/
-.cache
+.cache.json
 .lockout.json
 config.json
 __pycache__/
+repo/
