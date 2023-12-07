@@ -2,7 +2,22 @@ import logging
 import os
 import shutil
 import subprocess
+import shlex
 from archlinux_discord.config import get_config
+
+
+def _run_with_timeout(cmd, timeout=300, **kwargs):
+    proc = subprocess.Popen(cmd, **kwargs)
+    try:
+        proc.wait(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        logging.error(f"Command {cmd} timed out")
+        proc.kill()
+        return None
+    if proc.returncode != 0:
+        logging.error(f"Command {cmd} returned non-zero exit code")
+        return None
+    return proc
 
 
 def build_package(branch: str, version: str):
@@ -30,21 +45,17 @@ def build_package(branch: str, version: str):
         return None
 
     logging.debug(f"Updating checksums...")
-    ret = subprocess.run("updpkgsums", shell=True, cwd=path)
-    if ret.returncode != 0:
+    if not _run_with_timeout("updpkgsums", shell=True, cwd=path):
         logging.error("Could not update checksums")
-        logging.error(ret.stderr)
         return None
     logging.debug(f"Building package...")
-    ret = subprocess.run(
-        "makepkg -sf --noconfirm",
+    if not _run_with_timeout(
+        "extra-x86_64-build",
         shell=True,
         cwd=path,
         env={"PACKAGER": "Arch Linux Discord <mrkirby153@mrkirby153.com>"},
-    )
-    if ret.returncode != 0:
+    ):
         logging.error("Could not build package")
-        logging.error(ret.stderr)
         return None
     logging.info("Package built successfully!")
     for file in os.listdir(path):

@@ -1,6 +1,7 @@
 import shutil
 import logging
 import os
+import time
 from archlinux_discord.package import build_package
 from archlinux_discord.repo import add_to_repo
 from archlinux_discord.config import load_config, get_config
@@ -22,8 +23,17 @@ def setup_logging(debug=False):
     )
 
 
-def auto():
+def auto(daemon=False):
     logging.info("Running in auto mode")
+
+    if daemon:
+        logging.info("Running in daemon mode")
+        while True:
+            for branch in ["canary", "ptb", "stable"]:
+                check_for_updates(branch)
+            logging.info("Next check in 60 seconds...")
+            time.sleep(60)
+
     for branch in ["canary", "ptb", "stable"]:
         check_for_updates(branch)
 
@@ -71,6 +81,7 @@ def main():
     parser.add_argument("--debug", action="store_true", default=False)
     parser.add_argument("--unlock", action="store_true", default=False)
     parser.add_argument("--lock", action="store_true", default=False)
+    parser.add_argument("--daemon", action="store_true", default=False)
     args = parser.parse_args()
     setup_logging(args.debug)
     load_config()
@@ -87,7 +98,7 @@ def main():
         else:
             check_for_updates(args.branch)
     else:
-        auto()
+        auto(args.daemon)
 
 
 if __name__ == "__main__":
