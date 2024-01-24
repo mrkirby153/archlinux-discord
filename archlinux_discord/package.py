@@ -2,7 +2,7 @@ import logging
 import os
 import shutil
 import subprocess
-import shlex
+
 from archlinux_discord.config import get_config
 
 
@@ -11,31 +11,31 @@ def _run_with_timeout(cmd, timeout=300, **kwargs):
     try:
         proc.wait(timeout=timeout)
     except subprocess.TimeoutExpired:
-        logging.error(f"Command {cmd} timed out")
+        logging.error("Command %s timed out", cmd)
         proc.kill()
         return None
     if proc.returncode != 0:
-        logging.error(f"Command {cmd} returned non-zero exit code")
+        logging.error("Command %s returned non-zero exit code", cmd)
         return None
     return proc
 
 
 def build_package(branch: str, version: str):
-    logging.info(f"Building branch {branch} with version {version}")
+    logging.info("Building branch %s with version %s", branch, version)
     path = os.path.join(get_config().get("workdir"), branch)
 
     if os.path.exists(path):
-        logging.info(f"Removing existing working directory {path}")
+        logging.info("Removing existing working directory %s", path)
         shutil.rmtree(path)
 
     os.makedirs(path, exist_ok=True)
 
-    logging.debug(f"Copying PKGBUILD to working directory...")
+    logging.debug("Copying PKGBUILD to working directory...")
     shutil.copyfile(
         os.path.join(get_config().get("pkgbuild_dir"), f"PKGBUILD.{branch}"),
         os.path.join(path, "PKGBUILD"),
     )
-    logging.debug(f"Replacing version in PKGBUILD...")
+    logging.debug("Replacing version in PKGBUILD...")
     ret = subprocess.run(
         f"sed -i 's/pkgver=.*/pkgver={version}/' PKGBUILD", shell=True, cwd=path
     )
@@ -44,11 +44,11 @@ def build_package(branch: str, version: str):
         logging.error(ret.stderr)
         return None
 
-    logging.debug(f"Updating checksums...")
+    logging.debug("Updating checksums...")
     if not _run_with_timeout("updpkgsums", shell=True, cwd=path):
         logging.error("Could not update checksums")
         return None
-    logging.debug(f"Building package...")
+    logging.debug("Building package...")
     if not _run_with_timeout(
         "extra-x86_64-build",
         shell=True,

@@ -20,7 +20,7 @@ def load_config():
     if os.path.exists("config.json"):
         with open("config.json", "r") as f:
             loaded_config = json.load(f)
-            logging.debug(f"Loaded config: {loaded_config}")
+            logging.debug("Loaded config: %s", loaded_config)
             config = {**config, **loaded_config}
             logging.info("Loaded config from config.json")
-    logging.debug(f"Configuration: {config}")
+    logging.debug("Configuration: %s", config)

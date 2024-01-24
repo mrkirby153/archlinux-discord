@@ -1,19 +1,15 @@
-import shutil
+import argparse
 import logging
 import os
+import shutil
 import time
+
+from archlinux_discord.config import get_config, load_config
+from archlinux_discord.discord import (lockout, send_webhook_message,
+                                       set_cached_version, unlock,
+                                       update_available)
 from archlinux_discord.package import build_package
 from archlinux_discord.repo import add_to_repo
-from archlinux_discord.config import load_config, get_config
-from archlinux_discord.discord import (
-    update_available,
-    send_webhook_message,
-    set_cached_version,
-    lockout,
-    unlock,
-)
-
-import argparse
 
 
 def setup_logging(debug=False):
@@ -48,15 +44,15 @@ def clean():
 
 
 def check_for_updates(branch):
-    logging.info(f"Checking for updates for {branch}")
+    logging.info("Checking for updates for %s", branch)
     new_version = update_available(branch)
     if new_version:
-        logging.info(f"New version available: {new_version}")
+        logging.info("New version available: %s", new_version)
         send_webhook_message(
             f"New {branch} version available: {new_version}. Initiating build"
         )
         built_package = build_package(branch, new_version)
-        logging.info(f"Built package: {built_package}")
+        logging.info("Built package: %s", built_package)
         if not build_package:
             lockout(branch)
             send_webhook_message(
@@ -90,10 +86,10 @@ def main():
         clean()
     elif args.branch:
         if args.unlock:
-            logging.info(f"Unlocking {args.branch}")
+            logging.info("Unlocking %s", args.branch)
             unlock(args.branch)
         elif args.lock:
-            logging.info(f"Locking {args.branch}")
+            logging.info("Locking %s", args.branch)
             lockout(args.branch)
         else:
             check_for_updates(args.branch)
