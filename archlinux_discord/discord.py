@@ -1,9 +1,10 @@
-from archlinux_discord.config import get_config
-import logging
-import requests
-import os
 import json
+import logging
+import os
 
+import requests
+
+from archlinux_discord.config import get_config
 
 CACHE_FILE = ".cache.json"
 
@@ -12,7 +13,7 @@ def get_current_version(branch):
     if branch not in ["canary", "ptb", "stable"]:
         raise ValueError("Invalid branch")
     url = f"https://discord.com/api/updates/{branch}?platform=linux"
-    logging.debug(f"Getting current version from {url}")
+    logging.debug("Getting current version from %s", url)
     resp = requests.get(url)
     if resp.status_code != 200:
         raise ValueError(f"Could not get current version: {resp.status_code}")
@@ -80,8 +81,8 @@ def unlock(branch):
 
 def send_webhook_message(message):
     webhooks = get_config().get("webhooks")
-    logging.debug(f"Sending webhook message: {message}: {webhooks}")
+    logging.debug("Sending webhook message: %s: %s", message, webhooks)
     for webhook_url in webhooks:
-        logging.debug(f"Sending webhook message to {webhook_url}")
+        logging.debug("Sending webhook message to %s", webhook_url)
         res = requests.post(webhook_url, json={"content": message})
         res.raise_for_status()

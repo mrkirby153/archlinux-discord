@@ -2,6 +2,7 @@ import logging
 import os
 import shutil
 import subprocess
+
 from archlinux_discord.config import get_config
 
 
