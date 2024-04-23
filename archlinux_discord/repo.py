@@ -3,6 +3,37 @@ import os
 import shutil
 import subprocess
 from archlinux_discord.config import get_config
+from archlinux_discord.s3 import upload_file, get_file
+
+
+def archive_old_package(name):
+    REPO_LOCATION = get_config().get("repo_location")
+    logging.debug("Archiving old package...")
+    archive_path = os.path.join(REPO_LOCATION, "archive", name)
+    old_file = os.path.join(REPO_LOCATION, name)
+    if not os.path.exists(old_file):
+        logging.debug("Old package does not exist")
+        return
+
+    if os.path.exists(archive_path):
+        logging.debug("Removing existing archive...")
+        shutil.rmtree(archive_path)
+    os.makedirs(archive_path, exist_ok=True)
+    os.rename(os.path.join(REPO_LOCATION, name), os.path.join(archive_path, name))
+    if os.path.exists(os.path.join(REPO_LOCATION, name + ".sig")):
+        os.rename(
+            os.path.join(REPO_LOCATION, name + ".sig"),
+            os.path.join(archive_path, name + ".sig"),
+        )
+
+
+def remove_old_files():
+    REPO_LOCATION = get_config().get("repo_location")
+    logging.debug("Removing old files...")
+    for file in os.listdir(REPO_LOCATION):
+        if file.endswith(".old") or file.endswith(".old.sig"):
+            logging.debug(f"Removing {file}")
+            os.remove(os.path.join(REPO_LOCATION, file))
 
 
 def add_to_repo(path):
@@ -51,3 +82,4 @@ def add_to_repo(path):
         logging.error("Could not add package to repo")
         logging.error(ret.stderr)
         return None
+    remove_old_files()

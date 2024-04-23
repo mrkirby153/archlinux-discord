@@ -3,7 +3,7 @@ import logging
 import os
 import time
 from archlinux_discord.package import build_package
-from archlinux_discord.repo import add_to_repo
+from archlinux_discord.repo import add_to_repo, archive_old_package
 from archlinux_discord.config import load_config, get_config
 from archlinux_discord.discord import (
     update_available,
@@ -11,6 +11,8 @@ from archlinux_discord.discord import (
     set_cached_version,
     lockout,
     unlock,
+    get_cached_file_name,
+    set_cached_file_name,
 )
 
 import argparse
@@ -63,8 +65,13 @@ def check_for_updates(branch):
                 f":rotating_light: Build failed for {branch} and {new_version}. Builds will not be attempted for this channel"
             )
             return
+        old_package = get_cached_file_name(branch)
+        logging.info(f"Old package: {old_package}")
+        if old_package:
+            archive_old_package(old_package)
         add_to_repo(built_package)
         set_cached_version(branch, new_version)
+        set_cached_file_name(branch, os.path.basename(built_package))
         send_webhook_message(f"{branch} {new_version} built and added to repo")
     else:
         logging.info("No new version available")

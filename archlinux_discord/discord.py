@@ -42,6 +42,28 @@ def set_cached_version(branch, version):
         json.dump(data, f)
 
 
+def set_cached_file_name(branch, file):
+    if branch not in ["canary", "ptb", "stable"]:
+        raise ValueError("Invalid branch")
+    data = {}
+    if os.path.exists(CACHE_FILE):
+        with open(CACHE_FILE, "r") as f:
+            data = json.load(f)
+    data[f"{branch}_file"] = file
+    with open(CACHE_FILE, "w") as f:
+        json.dump(data, f)
+
+
+def get_cached_file_name(branch):
+    if branch not in ["canary", "ptb", "stable"]:
+        raise ValueError("Invalid branch")
+    if not os.path.exists(CACHE_FILE):
+        return None
+    with open(CACHE_FILE, "r") as f:
+        data = json.load(f)
+    return data.get(f"{branch}_file")
+
+
 def update_available(branch):
     if locked(branch):
         return None
