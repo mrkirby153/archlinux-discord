@@ -3,7 +3,6 @@ import os
 import shutil
 import subprocess
 from archlinux_discord.config import get_config
-from archlinux_discord.s3 import upload_file, get_file
 
 
 def archive_old_package(name):
