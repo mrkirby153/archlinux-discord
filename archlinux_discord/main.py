@@ -59,7 +59,7 @@ def check_for_updates(branch):
         )
         built_package = build_package(branch, new_version)
         logging.info(f"Built package: {built_package}")
-        if not build_package:
+        if not built_package:
             lockout(branch)
             send_webhook_message(
                 f":rotating_light: Build failed for {branch} and {new_version}. Builds will not be attempted for this channel"
